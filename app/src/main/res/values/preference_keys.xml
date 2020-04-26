@@ -45,6 +45,7 @@
     <string name="pref_key_advanced_screen" translatable="false"><xliff:g id="preference_key">pref_advanced_screen</xliff:g></string>
     <string name="pref_key_general_screen" translatable="false"><xliff:g id="preference_key">pref_general_screen</xliff:g></string>
 
+    <string name="pref_key_proxy_screen" translatable="false"><xliff:g id="preference_key">pref_screen_proxy</xliff:g></string>
     <string name="pref_key_mozilla_screen" translatable="false"><xliff:g id="preference_key">pref_screen_mozilla</xliff:g></string>
     <string name="pref_key_search_screen" translatable="false"><xliff:g id="preference_key">pref_screen_search</xliff:g></string>
     <string name="pref_key_remote_debugging" translatable="false"><xliff:g id="preference_key">pref_remote_debugging</xliff:g></string>
@@ -67,4 +68,9 @@
     <string name="pref_key_screen_exceptions" translatable="false">
         <xliff:g id="preference_key">pref_screen_exceptions</xliff:g>
     </string>
+
+    <string name="pref_key_proxy_enable" translatable="false"><xliff:g id="preference_key">pref_proxy_enable</xliff:g></string>
+    <string name="pref_key_proxy_bypass" translatable="false"><xliff:g id="preference_key">pref_proxy_bypass</xliff:g></string>
+    <string name="pref_key_proxy_host" translatable="false"><xliff:g id="preference_key">pref_proxy_host</xliff:g></string>
+    <string name="pref_key_proxy_port" translatable="false"><xliff:g id="preference_key">pref_proxy_port</xliff:g></string>
 </resources>

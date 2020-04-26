@@ -51,6 +51,7 @@ import org.mozilla.geckoview.GeckoSession.NavigationDelegate
 import org.mozilla.geckoview.GeckoSessionSettings
 import org.mozilla.geckoview.SessionFinder
 import org.mozilla.geckoview.WebRequestError
+import org.mozilla.gecko.PrefsHelper
 import kotlin.coroutines.CoroutineContext
 
 /**
@@ -67,7 +68,7 @@ class GeckoWebViewProvider : IWebViewProvider {
         val settings = Settings.getInstance(context)
         if (!settings.shouldShowFirstrun() && settings.isFirstGeckoRun()) {
             PreferenceManager.getDefaultSharedPreferences(context)
-                .edit().putBoolean(PREF_FIRST_GECKO_RUN, false).apply()
+                    .edit().putBoolean(PREF_FIRST_GECKO_RUN, false).apply()
             Log.d(javaClass.simpleName, "Sending change to Gecko ping")
             TelemetryWrapper.changeToGeckoEngineEvent()
         }
@@ -112,9 +113,9 @@ class GeckoWebViewProvider : IWebViewProvider {
     }
 
     override fun applyAppSettings(
-        context: Context,
-        webSettings: WebSettings,
-        systemWebView: SystemWebView
+            context: Context,
+            webSettings: WebSettings,
+            systemWebView: SystemWebView
     ) {
     }
 
@@ -127,10 +128,10 @@ class GeckoWebViewProvider : IWebViewProvider {
 
     @Suppress("LargeClass", "TooManyFunctions")
     class GeckoWebView(context: Context, attrs: AttributeSet?) :
-        NestedGeckoView(context, attrs),
-        IWebView,
-        SharedPreferences.OnSharedPreferenceChangeListener,
-        CoroutineScope {
+            NestedGeckoView(context, attrs),
+            IWebView,
+            SharedPreferences.OnSharedPreferenceChangeListener,
+            CoroutineScope {
         private var callback: IWebView.Callback? = null
         private var findListener: IFindListener? = null
         private var currentUrl: String = ABOUT_BLANK
@@ -148,7 +149,7 @@ class GeckoWebViewProvider : IWebViewProvider {
 
         init {
             PreferenceManager.getDefaultSharedPreferences(context)
-                .registerOnSharedPreferenceChangeListener(this)
+                    .registerOnSharedPreferenceChangeListener(this)
             geckoSession = createGeckoSession()
             applySettingsAndSetDelegates()
             geckoSession.open(geckoRuntime!!)
@@ -157,6 +158,7 @@ class GeckoWebViewProvider : IWebViewProvider {
 
         private fun applySettingsAndSetDelegates() {
             applyAppSettings()
+            applyProxySettings()
             updateBlocking()
 
             geckoSession.contentDelegate = createContentDelegate()
@@ -252,8 +254,8 @@ class GeckoWebViewProvider : IWebViewProvider {
 
         @Suppress("ComplexMethod")
         override fun onSharedPreferenceChanged(
-            sharedPreferences: SharedPreferences,
-            key: String
+                sharedPreferences: SharedPreferences,
+                key: String
         ) {
             when (key) {
                 context.getString(R.string.pref_key_privacy_block_social),
@@ -274,7 +276,7 @@ class GeckoWebViewProvider : IWebViewProvider {
                 }
                 context.getString(R.string.pref_key_safe_browsing) -> {
                     val shouldUseSafeBrowsing =
-                        Settings.getInstance(context).shouldUseSafeBrowsing()
+                            Settings.getInstance(context).shouldUseSafeBrowsing()
                     var cats = geckoRuntime!!.settings.contentBlocking.safeBrowsingCategories
                     if (shouldUseSafeBrowsing) {
                         cats = cats or ContentBlocking.SafeBrowsing.MALWARE or
@@ -285,6 +287,11 @@ class GeckoWebViewProvider : IWebViewProvider {
                     }
                     geckoRuntime!!.settings.contentBlocking.setSafeBrowsing(cats)
                 }
+                context.getString(R.string.pref_key_proxy_host) -> PrefsHelper.setPref("network.proxy.socks", Settings.getInstance(context).getProxyHost())
+                context.getString(R.string.pref_key_proxy_port) -> PrefsHelper.setPref("network.proxy.socks_port", Settings.getInstance(context).getProxyPort())
+                context.getString(R.string.pref_key_proxy_bypass) -> PrefsHelper.setPref("network.proxy.no_proxies_on", Settings.getInstance(context).getProxyBypass())
+                context.getString(R.string.pref_key_proxy_enable) -> PrefsHelper.setPref("network.proxy.type", if (Settings.getInstance(context).isProxyEnabled()) NETWORK_PROXY_TYPE_MANUAL else NETWORK_PROXY_TYPE_SYSTEM)
+
                 else -> return
             }
             reload()
@@ -299,19 +306,28 @@ class GeckoWebViewProvider : IWebViewProvider {
             updateCookieSettings()
         }
 
+        private fun applyProxySettings() {
+            PrefsHelper.setPref("network.proxy.socks", Settings.getInstance(context).getProxyHost());
+            PrefsHelper.setPref("network.proxy.socks_port", Settings.getInstance(context).getProxyPort());
+            PrefsHelper.setPref("network.proxy.socks_version", 5);
+            PrefsHelper.setPref("network.proxy.socks_remote_dns", true);
+            PrefsHelper.setPref("network.proxy.no_proxies_on", Settings.getInstance(context).getProxyBypass());
+            PrefsHelper.setPref("network.proxy.type", if (Settings.getInstance(context).isProxyEnabled()) NETWORK_PROXY_TYPE_MANUAL else NETWORK_PROXY_TYPE_SYSTEM)
+        }
+
         private fun updateCookieSettings() {
             geckoRuntime!!.settings.contentBlocking.cookieBehavior =
                     when (Settings.getInstance(context).shouldBlockCookiesValue()) {
                         context.getString(
-                            R.string.preference_privacy_should_block_cookies_yes_option
+                                R.string.preference_privacy_should_block_cookies_yes_option
                         ) ->
                             ContentBlocking.CookieBehavior.ACCEPT_NONE
                         context.getString(
-                            R.string.preference_privacy_should_block_cookies_third_party_tracker_cookies_option
+                                R.string.preference_privacy_should_block_cookies_third_party_tracker_cookies_option
                         ) ->
                             ContentBlocking.CookieBehavior.ACCEPT_NON_TRACKERS
                         context.getString(
-                            R.string.preference_privacy_should_block_cookies_third_party_only_option
+                                R.string.preference_privacy_should_block_cookies_third_party_only_option
                         ) ->
                             ContentBlocking.CookieBehavior.ACCEPT_FIRST_PARTY
                         else -> ContentBlocking.CookieBehavior.ACCEPT_ALL
@@ -363,20 +379,20 @@ class GeckoWebViewProvider : IWebViewProvider {
                 }
 
                 override fun onContextMenu(
-                    session: GeckoSession,
-                    screenX: Int,
-                    screenY: Int,
-                    contextElement: GeckoSession.ContentDelegate.ContextElement
+                        session: GeckoSession,
+                        screenX: Int,
+                        screenY: Int,
+                        contextElement: GeckoSession.ContentDelegate.ContextElement
                 ) {
                     val elementSrc = contextElement.srcUri
                     val uri = contextElement.linkUri
                     val elementType = contextElement.type
                     if (elementSrc != null && uri != null &&
-                        elementType == GeckoSession.ContentDelegate.ContextElement.TYPE_IMAGE
+                            elementType == GeckoSession.ContentDelegate.ContextElement.TYPE_IMAGE
                     ) {
                         callback?.onLongPress(IWebView.HitTarget(true, uri, true, elementSrc))
                     } else if (elementSrc != null &&
-                        elementType == GeckoSession.ContentDelegate.ContextElement.TYPE_IMAGE) {
+                            elementType == GeckoSession.ContentDelegate.ContextElement.TYPE_IMAGE) {
                         callback?.onLongPress(IWebView.HitTarget(false, null, true, elementSrc))
                     } else if (uri != null) {
                         callback?.onLongPress(IWebView.HitTarget(true, uri, false, null))
@@ -384,8 +400,8 @@ class GeckoWebViewProvider : IWebViewProvider {
                 }
 
                 override fun onExternalResponse(
-                    session: GeckoSession,
-                    response: GeckoSession.WebResponseInfo
+                        session: GeckoSession,
+                        response: GeckoSession.WebResponseInfo
                 ) {
                     if (!AppConstants.supportsDownloadingFiles()) {
                         return
@@ -401,9 +417,9 @@ class GeckoWebViewProvider : IWebViewProvider {
                     }
 
                     val download = Download(
-                        response.uri, USER_AGENT,
-                        response.filename, response.contentType, response.contentLength,
-                        Environment.DIRECTORY_DOWNLOADS, response.filename
+                            response.uri, USER_AGENT,
+                            response.filename, response.contentType, response.contentLength,
+                            Environment.DIRECTORY_DOWNLOADS, response.filename
                     )
                     callback?.onDownloadStart(download)
                 }
@@ -461,8 +477,8 @@ class GeckoWebViewProvider : IWebViewProvider {
                 }
 
                 override fun onSecurityChange(
-                    session: GeckoSession,
-                    securityInfo: GeckoSession.ProgressDelegate.SecurityInformation
+                        session: GeckoSession,
+                        securityInfo: GeckoSession.ProgressDelegate.SecurityInformation
                 ) {
                     isSecure = securityInfo.isSecure
 
@@ -472,9 +488,9 @@ class GeckoWebViewProvider : IWebViewProvider {
                     }
 
                     callback?.onSecurityChanged(
-                        isSecure,
-                        securityInfo.host,
-                        securityInfo.certificate?.issuerDN?.name
+                            isSecure,
+                            securityInfo.host,
+                            securityInfo.certificate?.issuerDN?.name
                     )
                 }
             }
@@ -484,8 +500,8 @@ class GeckoWebViewProvider : IWebViewProvider {
         private fun createNavigationDelegate(): GeckoSession.NavigationDelegate {
             return object : GeckoSession.NavigationDelegate {
                 override fun onLoadRequest(
-                    session: GeckoSession,
-                    request: NavigationDelegate.LoadRequest
+                        session: GeckoSession,
+                        request: NavigationDelegate.LoadRequest
                 ): GeckoResult<AllowOrDeny>? {
                     val uri = Uri.parse(request.uri)
 
@@ -495,17 +511,17 @@ class GeckoWebViewProvider : IWebViewProvider {
                             AllowOrDeny.DENY
                         }
                         LocalizedContent.handleInternalContent(
-                            request.uri,
-                            this@GeckoWebView,
-                            context
+                                request.uri,
+                                this@GeckoWebView,
+                                context
                         ) -> {
                             AllowOrDeny.DENY
                         }
                         !UrlUtils.isSupportedProtocol(uri.scheme) && callback != null &&
                                 IntentUtils.handleExternalUri(
-                                    context,
-                                    this@GeckoWebView,
-                                    request.uri
+                                        context,
+                                        this@GeckoWebView,
+                                        request.uri
                                 ) -> {
                             AllowOrDeny.DENY
                         }
@@ -519,22 +535,22 @@ class GeckoWebViewProvider : IWebViewProvider {
                 }
 
                 override fun onLoadError(
-                    session: GeckoSession,
-                    uri: String?,
-                    webRequestError: WebRequestError
+                        session: GeckoSession,
+                        uri: String?,
+                        webRequestError: WebRequestError
                 ): GeckoResult<String> {
                     ErrorPages.createErrorPage(
-                        context,
-                        geckoErrorToErrorType(webRequestError.code),
-                        uri
+                            context,
+                            geckoErrorToErrorType(webRequestError.code),
+                            uri
                     ).apply {
                         return GeckoResult.fromValue(Base64.encodeToUriString(this))
                     }
                 }
 
                 override fun onNewSession(
-                    session: GeckoSession,
-                    uri: String
+                        session: GeckoSession,
+                        uri: String
                 ): GeckoResult<GeckoSession>? {
                     // Prevent new sessions to be created from onLoadRequest
                     throw IllegalStateException()
@@ -666,14 +682,14 @@ class GeckoWebViewProvider : IWebViewProvider {
 
         override fun findNext(forward: Boolean) {
             finder.find(null, if (forward) 0 else GeckoSession.FINDER_FIND_BACKWARDS)
-                .then({ result ->
-                    if (result != null) {
-                        findListener?.onFindResultReceived(result.current, result.total, true)
-                    }
-                    GeckoResult<Void>()
-                }, { _ ->
-                    GeckoResult<Void>()
-                })
+                    .then({ result ->
+                        if (result != null) {
+                            findListener?.onFindResultReceived(result.current, result.total, true)
+                        }
+                        GeckoResult<Void>()
+                    }, { _ ->
+                        GeckoResult<Void>()
+                    })
         }
 
         override fun clearMatches() {
@@ -685,11 +701,11 @@ class GeckoWebViewProvider : IWebViewProvider {
         }
 
         override fun loadData(
-            baseURL: String,
-            data: String,
-            mimeType: String,
-            encoding: String,
-            historyURL: String
+                baseURL: String,
+                data: String,
+                mimeType: String,
+                encoding: String,
+                historyURL: String
         ) {
             isLoadingInternalUrl = historyURL == LocalizedContent.URL_RIGHTS || historyURL ==
                     LocalizedContent.URL_ABOUT
@@ -724,7 +740,7 @@ class GeckoWebViewProvider : IWebViewProvider {
 
         override fun onDetachedFromWindow() {
             PreferenceManager.getDefaultSharedPreferences(context)
-                .unregisterOnSharedPreferenceChangeListener(this)
+                    .unregisterOnSharedPreferenceChangeListener(this)
             releaseSession()
             super.onDetachedFromWindow()
         }
@@ -740,7 +756,7 @@ class GeckoWebViewProvider : IWebViewProvider {
         private var internalAboutData: String? = null
         private var internalRightsData: String? = null
         private const val USER_AGENT =
-            "Mozilla/5.0 (Android 8.1.0; Mobile; rv:60.0) Gecko/60.0 Firefox/60.0"
+                "Mozilla/5.0 (Android 8.1.0; Mobile; rv:60.0) Gecko/60.0 Firefox/60.0"
         const val PREF_FIRST_GECKO_RUN: String = "first_gecko_run"
         const val PROGRESS_100 = 100
         const val CAN_GO_BACK = "canGoBack"
@@ -751,39 +767,42 @@ class GeckoWebViewProvider : IWebViewProvider {
         const val CURRENT_URL = "currentUrl"
         const val ABOUT_BLANK = "about:blank"
 
+        const val NETWORK_PROXY_TYPE_SYSTEM = 5
+        const val NETWORK_PROXY_TYPE_MANUAL = 1
+
         /**
          * Provides an ErrorType corresponding to the error code provided.
          */
         @Suppress("ComplexMethod")
         internal fun geckoErrorToErrorType(errorCode: Int) =
-            when (errorCode) {
-                WebRequestError.ERROR_UNKNOWN -> ErrorType.UNKNOWN
-                WebRequestError.ERROR_SECURITY_SSL -> ErrorType.ERROR_SECURITY_SSL
-                WebRequestError.ERROR_SECURITY_BAD_CERT -> ErrorType.ERROR_SECURITY_BAD_CERT
-                WebRequestError.ERROR_NET_INTERRUPT -> ErrorType.ERROR_NET_INTERRUPT
-                WebRequestError.ERROR_NET_TIMEOUT -> ErrorType.ERROR_NET_TIMEOUT
-                WebRequestError.ERROR_CONNECTION_REFUSED -> ErrorType.ERROR_CONNECTION_REFUSED
-                WebRequestError.ERROR_UNKNOWN_SOCKET_TYPE -> ErrorType.ERROR_UNKNOWN_SOCKET_TYPE
-                WebRequestError.ERROR_REDIRECT_LOOP -> ErrorType.ERROR_REDIRECT_LOOP
-                WebRequestError.ERROR_OFFLINE -> ErrorType.ERROR_OFFLINE
-                WebRequestError.ERROR_PORT_BLOCKED -> ErrorType.ERROR_PORT_BLOCKED
-                WebRequestError.ERROR_NET_RESET -> ErrorType.ERROR_NET_RESET
-                WebRequestError.ERROR_UNSAFE_CONTENT_TYPE -> ErrorType.ERROR_UNSAFE_CONTENT_TYPE
-                WebRequestError.ERROR_CORRUPTED_CONTENT -> ErrorType.ERROR_CORRUPTED_CONTENT
-                WebRequestError.ERROR_CONTENT_CRASHED -> ErrorType.ERROR_CONTENT_CRASHED
-                WebRequestError.ERROR_INVALID_CONTENT_ENCODING -> ErrorType.ERROR_INVALID_CONTENT_ENCODING
-                WebRequestError.ERROR_UNKNOWN_HOST -> ErrorType.ERROR_UNKNOWN_HOST
-                WebRequestError.ERROR_MALFORMED_URI -> ErrorType.ERROR_MALFORMED_URI
-                WebRequestError.ERROR_UNKNOWN_PROTOCOL -> ErrorType.ERROR_UNKNOWN_PROTOCOL
-                WebRequestError.ERROR_FILE_NOT_FOUND -> ErrorType.ERROR_FILE_NOT_FOUND
-                WebRequestError.ERROR_FILE_ACCESS_DENIED -> ErrorType.ERROR_FILE_ACCESS_DENIED
-                WebRequestError.ERROR_PROXY_CONNECTION_REFUSED -> ErrorType.ERROR_PROXY_CONNECTION_REFUSED
-                WebRequestError.ERROR_UNKNOWN_PROXY_HOST -> ErrorType.ERROR_UNKNOWN_PROXY_HOST
-                WebRequestError.ERROR_SAFEBROWSING_MALWARE_URI -> ErrorType.ERROR_SAFEBROWSING_MALWARE_URI
-                WebRequestError.ERROR_SAFEBROWSING_UNWANTED_URI -> ErrorType.ERROR_SAFEBROWSING_UNWANTED_URI
-                WebRequestError.ERROR_SAFEBROWSING_HARMFUL_URI -> ErrorType.ERROR_SAFEBROWSING_HARMFUL_URI
-                WebRequestError.ERROR_SAFEBROWSING_PHISHING_URI -> ErrorType.ERROR_SAFEBROWSING_PHISHING_URI
-                else -> ErrorType.UNKNOWN
-            }
+                when (errorCode) {
+                    WebRequestError.ERROR_UNKNOWN -> ErrorType.UNKNOWN
+                    WebRequestError.ERROR_SECURITY_SSL -> ErrorType.ERROR_SECURITY_SSL
+                    WebRequestError.ERROR_SECURITY_BAD_CERT -> ErrorType.ERROR_SECURITY_BAD_CERT
+                    WebRequestError.ERROR_NET_INTERRUPT -> ErrorType.ERROR_NET_INTERRUPT
+                    WebRequestError.ERROR_NET_TIMEOUT -> ErrorType.ERROR_NET_TIMEOUT
+                    WebRequestError.ERROR_CONNECTION_REFUSED -> ErrorType.ERROR_CONNECTION_REFUSED
+                    WebRequestError.ERROR_UNKNOWN_SOCKET_TYPE -> ErrorType.ERROR_UNKNOWN_SOCKET_TYPE
+                    WebRequestError.ERROR_REDIRECT_LOOP -> ErrorType.ERROR_REDIRECT_LOOP
+                    WebRequestError.ERROR_OFFLINE -> ErrorType.ERROR_OFFLINE
+                    WebRequestError.ERROR_PORT_BLOCKED -> ErrorType.ERROR_PORT_BLOCKED
+                    WebRequestError.ERROR_NET_RESET -> ErrorType.ERROR_NET_RESET
+                    WebRequestError.ERROR_UNSAFE_CONTENT_TYPE -> ErrorType.ERROR_UNSAFE_CONTENT_TYPE
+                    WebRequestError.ERROR_CORRUPTED_CONTENT -> ErrorType.ERROR_CORRUPTED_CONTENT
+                    WebRequestError.ERROR_CONTENT_CRASHED -> ErrorType.ERROR_CONTENT_CRASHED
+                    WebRequestError.ERROR_INVALID_CONTENT_ENCODING -> ErrorType.ERROR_INVALID_CONTENT_ENCODING
+                    WebRequestError.ERROR_UNKNOWN_HOST -> ErrorType.ERROR_UNKNOWN_HOST
+                    WebRequestError.ERROR_MALFORMED_URI -> ErrorType.ERROR_MALFORMED_URI
+                    WebRequestError.ERROR_UNKNOWN_PROTOCOL -> ErrorType.ERROR_UNKNOWN_PROTOCOL
+                    WebRequestError.ERROR_FILE_NOT_FOUND -> ErrorType.ERROR_FILE_NOT_FOUND
+                    WebRequestError.ERROR_FILE_ACCESS_DENIED -> ErrorType.ERROR_FILE_ACCESS_DENIED
+                    WebRequestError.ERROR_PROXY_CONNECTION_REFUSED -> ErrorType.ERROR_PROXY_CONNECTION_REFUSED
+                    WebRequestError.ERROR_UNKNOWN_PROXY_HOST -> ErrorType.ERROR_UNKNOWN_PROXY_HOST
+                    WebRequestError.ERROR_SAFEBROWSING_MALWARE_URI -> ErrorType.ERROR_SAFEBROWSING_MALWARE_URI
+                    WebRequestError.ERROR_SAFEBROWSING_UNWANTED_URI -> ErrorType.ERROR_SAFEBROWSING_UNWANTED_URI
+                    WebRequestError.ERROR_SAFEBROWSING_HARMFUL_URI -> ErrorType.ERROR_SAFEBROWSING_HARMFUL_URI
+                    WebRequestError.ERROR_SAFEBROWSING_PHISHING_URI -> ErrorType.ERROR_SAFEBROWSING_PHISHING_URI
+                    else -> ErrorType.UNKNOWN
+                }
     }
 }

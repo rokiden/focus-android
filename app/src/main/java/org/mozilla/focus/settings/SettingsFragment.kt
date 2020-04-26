@@ -50,6 +50,8 @@ class SettingsFragment : BaseSettingsFragment(), SharedPreferences.OnSharedPrefe
                     .pref_key_advanced_screen) -> navigateToFragment(AdvancedSettingsFragment())
             preference.key == resources.getString(R.string
                     .pref_key_mozilla_screen) -> navigateToFragment(MozillaSettingsFragment())
+            preference.key == resources.getString(R.string
+                    .pref_key_proxy_screen) -> navigateToFragment(ProxySettingsFragment())
         }
 
         return super.onPreferenceTreeClick(preference)

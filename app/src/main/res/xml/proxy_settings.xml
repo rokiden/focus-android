@@ -1,0 +1,27 @@
+<?xml version="1.0" encoding="utf-8"?><!-- This Source Code Form is subject to the terms of the Mozilla Public
+   - License, v. 2.0. If a copy of the MPL was not distributed with this
+   - file, You can obtain one at http://mozilla.org/MPL/2.0/. -->
+<androidx.preference.PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
+    <androidx.preference.SwitchPreferenceCompat
+        android:defaultValue="false"
+        android:key="@string/pref_key_proxy_enable"
+        android:layout="@layout/focus_preference_no_icon"
+        android:title="@string/preference_proxy_enable" />
+    <androidx.preference.EditTextPreference
+        android:defaultValue="@string/default_proxy_host"
+        android:key="@string/pref_key_proxy_host"
+        android:layout="@layout/focus_preference_no_icon"
+        android:title="@string/proxy_server_host_hint" />
+    <androidx.preference.EditTextPreference
+        android:defaultValue="@string/default_proxy_port"
+        android:key="@string/pref_key_proxy_port"
+        android:layout="@layout/focus_preference_no_icon"
+        android:title="@string/proxy_server_port_hint" />
+
+    <!--suppress AndroidDomInspection -->
+    <androidx.preference.EditTextPreference
+        android:defaultValue=""
+        android:key="@string/pref_key_proxy_bypass"
+        android:layout="@layout/focus_preference_no_icon"
+        android:title="@string/proxy_server_bypass_hint" />
+</androidx.preference.PreferenceScreen>

@@ -437,6 +437,8 @@ class UrlInputFragment :
 
             R.id.settings -> (activity as LocaleAwareAppCompatActivity).openPreferences()
 
+            R.id.proxy -> (activity as LocaleAwareAppCompatActivity).openProxySettings()
+
             R.id.help -> {
                 val session = Session(SupportUtils.HELP_URL, source = Session.Source.MENU)
                 requireComponents.sessionManager.add(session, selected = true)

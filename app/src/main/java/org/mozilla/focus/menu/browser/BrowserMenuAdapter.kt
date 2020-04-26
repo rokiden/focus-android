@@ -14,6 +14,7 @@ import mozilla.components.browser.state.state.CustomTabConfig
 
 import org.mozilla.focus.R
 import org.mozilla.focus.fragment.BrowserFragment
+import org.mozilla.focus.proxy.ProxyItemViewHolder
 import org.mozilla.focus.utils.AppConstants
 import org.mozilla.focus.utils.Browsers
 import org.mozilla.focus.utils.HardwareUtils
@@ -52,6 +53,10 @@ class BrowserMenuAdapter(
 
         object RequestDesktopCheck : MenuItem() {
             override val viewType = RequestDesktopCheckItemViewHolder.LAYOUT_ID
+        }
+
+        object Proxy : MenuItem() {
+            override val viewType = ProxyItemViewHolder.LAYOUT_ID
         }
     }
 
@@ -142,6 +147,8 @@ class BrowserMenuAdapter(
             )
         }
 
+        items.add(MenuItem.Proxy)
+
         if (AppConstants.isGeckoBuild) {
             // "Report Site Issue" is available for builds using GeckoView only
             items.add(
@@ -193,6 +200,9 @@ class BrowserMenuAdapter(
                     inflater.inflate(R.layout.request_desktop_check_menu_item, parent, false),
                     fragment
                 )
+            }
+            ProxyItemViewHolder.LAYOUT_ID -> {
+                ProxyItemViewHolder(inflater.inflate(R.layout.menu_proxy, parent, false))
             }
             MenuItemViewHolder.LAYOUT_ID -> MenuItemViewHolder(
                 inflater.inflate(

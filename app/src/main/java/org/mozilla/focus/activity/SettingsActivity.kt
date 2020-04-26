@@ -9,11 +9,7 @@ import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_settings.*
 import org.mozilla.focus.R
 import org.mozilla.focus.locale.LocaleAwareAppCompatActivity
-import org.mozilla.focus.settings.BaseSettingsFragment
-import org.mozilla.focus.settings.MozillaSettingsFragment
-import org.mozilla.focus.settings.SettingsFragment
-import org.mozilla.focus.settings.PrivacySecuritySettingsFragment
-import org.mozilla.focus.settings.GeneralSettingsFragment
+import org.mozilla.focus.settings.*
 
 class SettingsActivity : LocaleAwareAppCompatActivity(), BaseSettingsFragment.ActionBarUpdater {
 
@@ -23,6 +19,7 @@ class SettingsActivity : LocaleAwareAppCompatActivity(), BaseSettingsFragment.Ac
         const val SHOULD_OPEN_PRIVACY_EXTRA = "shouldOpenPrivacy"
         const val SHOULD_OPEN_MOZILLA_EXTRA = "shouldOpenMozilla"
         const val SHOULD_OPEN_GENERAL_EXTRA = "shouldOpenGeneral"
+        const val SHOULD_OPEN_PROXY_EXTRA   = "shouldOpenProxy"
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,6 +42,10 @@ class SettingsActivity : LocaleAwareAppCompatActivity(), BaseSettingsFragment.Ac
             } else if (intent?.extras?.getBoolean(SHOULD_OPEN_GENERAL_EXTRA) == true) {
                 supportFragmentManager.beginTransaction()
                         .replace(R.id.container, GeneralSettingsFragment())
+                        .commit()
+            } else if (intent?.extras?.getBoolean(SHOULD_OPEN_PROXY_EXTRA) == true) {
+                supportFragmentManager.beginTransaction()
+                        .replace(R.id.container, ProxySettingsFragment())
                         .commit()
             }
         } else if (savedInstanceState == null) {

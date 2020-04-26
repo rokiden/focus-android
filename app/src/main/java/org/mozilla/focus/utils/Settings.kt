@@ -40,7 +40,7 @@ class Settings private constructor(context: Context) {
         get() = preferences.getString(getPreferenceKey(R.string.pref_key_search_engine), "")!!
 
     fun shouldBlockImages(): Boolean =
-            // Not shipping in v1 (#188)
+    // Not shipping in v1 (#188)
             /* preferences.getBoolean(
                     resources.getString(R.string.pref_key_performance_block_images),
                     false); */
@@ -62,33 +62,33 @@ class Settings private constructor(context: Context) {
                     false)
 
     fun shouldBlockWebFonts(): Boolean =
-        preferences.getBoolean(
-            getPreferenceKey(R.string.pref_key_performance_block_webfonts),
-            false)
+            preferences.getBoolean(
+                    getPreferenceKey(R.string.pref_key_performance_block_webfonts),
+                    false)
 
     fun shouldBlockJavaScript(): Boolean =
             preferences.getBoolean(
-                getPreferenceKey(R.string.pref_key_performance_block_javascript),
-                false)
+                    getPreferenceKey(R.string.pref_key_performance_block_javascript),
+                    false)
 
     fun shouldBlockCookiesValue(): String =
-        if (AppConstants.isGeckoBuild) {
-            preferences.getString(
-                getPreferenceKey(
-                    R.string
-                        .pref_key_performance_enable_cookies
-                ),
-                resources.getString(R.string.preference_privacy_should_block_cookies_third_party_tracker_cookies_option)
-            )!!
-        } else {
-            preferences.getString(
-                getPreferenceKey(
-                    R.string
-                        .pref_key_performance_enable_cookies
-                ),
-                resources.getString(R.string.preference_privacy_should_block_cookies_no_option)
-            )!!
-        }
+            if (AppConstants.isGeckoBuild) {
+                preferences.getString(
+                        getPreferenceKey(
+                                R.string
+                                        .pref_key_performance_enable_cookies
+                        ),
+                        resources.getString(R.string.preference_privacy_should_block_cookies_third_party_tracker_cookies_option)
+                )!!
+            } else {
+                preferences.getString(
+                        getPreferenceKey(
+                                R.string
+                                        .pref_key_performance_enable_cookies
+                        ),
+                        resources.getString(R.string.preference_privacy_should_block_cookies_no_option)
+                )!!
+            }
 
     fun shouldBlockCookies(): Boolean =
             shouldBlockCookiesValue() == resources.getString(
@@ -110,7 +110,7 @@ class Settings private constructor(context: Context) {
             preferences.getBoolean(getPreferenceKey(R.string.pref_key_biometric), false)
 
     fun shouldOpenNewTabs(): Boolean =
-        preferences.getBoolean(getPreferenceKey(R.string.pref_key_open_new_tab), false)
+            preferences.getBoolean(getPreferenceKey(R.string.pref_key_open_new_tab), false)
 
     fun shouldUseSecureMode(): Boolean =
             preferences.getBoolean(getPreferenceKey(R.string.pref_key_secure), false)
@@ -137,9 +137,9 @@ class Settings private constructor(context: Context) {
                     true)
 
     fun shouldUseSafeBrowsing() =
-        preferences.getBoolean(
-            getPreferenceKey(R.string.pref_key_safe_browsing),
-            true)
+            preferences.getBoolean(
+                    getPreferenceKey(R.string.pref_key_safe_browsing),
+                    true)
 
     fun shouldBlockAnalyticTrackers() =
             preferences.getBoolean(
@@ -163,16 +163,16 @@ class Settings private constructor(context: Context) {
             preferences.getBoolean(SearchSuggestionsPreferences.DISMISSED_NO_SUGGESTIONS_PREF, false)
 
     fun isDefaultBrowser() = preferences.getBoolean(
-        getPreferenceKey(R.string.pref_key_default_browser),
-        false)
+            getPreferenceKey(R.string.pref_key_default_browser),
+            false)
 
     fun hasOpenedInNewTab() = preferences.getBoolean(
-        getPreferenceKey(R.string.has_opened_new_tab),
-        false)
+            getPreferenceKey(R.string.has_opened_new_tab),
+            false)
 
     fun hasRequestedDesktop() = preferences.getBoolean(
-        getPreferenceKey(R.string.has_requested_desktop),
-        false)
+            getPreferenceKey(R.string.has_requested_desktop),
+            false)
 
     fun hasTakenSurvey() = preferences.getBoolean(getPreferenceKey(R.string.has_taken_survey),
             false)
@@ -180,6 +180,14 @@ class Settings private constructor(context: Context) {
     fun getAppLaunchCount() = preferences.getInt(
             getPreferenceKey(R.string.app_launch_count),
             0)
+
+    fun getProxyBypass() = preferences.getString(getPreferenceKey(R.string.pref_key_proxy_bypass), "")
+    fun getProxyHost() = preferences.getString(getPreferenceKey(R.string.pref_key_proxy_host), resources.getString(R.string.default_proxy_host))
+    fun getProxyPort() = preferences.getString(getPreferenceKey(R.string.pref_key_proxy_port), resources.getString(R.string.default_proxy_port))!!.toInt()
+    fun isProxyEnabled() = preferences.getBoolean(getPreferenceKey(R.string.pref_key_proxy_enable), false)
+    fun setProxyEnabled(state: Boolean) {
+        preferences.edit().putBoolean(getPreferenceKey(R.string.pref_key_proxy_enable), state).apply()
+    }
 
     private fun getPreferenceKey(resourceId: Int): String =
             resources.getString(resourceId)

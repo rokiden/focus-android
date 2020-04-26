@@ -11,6 +11,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.TextView
 import org.mozilla.focus.R
+import org.mozilla.focus.proxy.ProxyItemViewHolder
 import org.mozilla.focus.whatsnew.WhatsNew
 
 /**
@@ -19,14 +20,15 @@ import org.mozilla.focus.whatsnew.WhatsNew
  * The menu structure is hard-coded in the init block of the class.
  */
 class HomeMenuAdapter(
-    context: Context,
-    private val listener: View.OnClickListener
+        context: Context,
+        private val listener: View.OnClickListener
 ) : RecyclerView.Adapter<RecyclerView.ViewHolder>() {
 
     private val items: List<MenuItem> = listOf(
             MenuItem(R.id.whats_new, WhatsNewViewHolder.LAYOUT_ID, context.getString(R.string.menu_whats_new)),
             MenuItem(R.id.help, MenuItemViewHolder.LAYOUT_ID, context.getString(R.string.menu_help)),
-            MenuItem(R.id.settings, MenuItemViewHolder.LAYOUT_ID, context.getString(R.string.menu_settings))
+            MenuItem(R.id.settings, MenuItemViewHolder.LAYOUT_ID, context.getString(R.string.menu_settings)),
+            MenuItem(R.id.proxy, ProxyItemViewHolder.LAYOUT_ID, context.getString(R.string.menu_proxy))
     )
 
     override fun onCreateViewHolder(parent: ViewGroup, viewType: Int): RecyclerView.ViewHolder {
@@ -35,6 +37,7 @@ class HomeMenuAdapter(
         return when (viewType) {
             WhatsNewViewHolder.LAYOUT_ID -> WhatsNewViewHolder(view, listener)
             MenuItemViewHolder.LAYOUT_ID -> MenuItemViewHolder(view as TextView, listener)
+            ProxyItemViewHolder.LAYOUT_ID -> ProxyItemViewHolder(view)
             else -> throw IllegalArgumentException("Unknown view type $viewType")
         }
     }
@@ -43,6 +46,7 @@ class HomeMenuAdapter(
         when (holder) {
             is MenuItemViewHolder -> holder.bind(items[position])
             is WhatsNewViewHolder -> holder.bind()
+            is ProxyItemViewHolder -> holder.bind()
             else -> throw IllegalArgumentException("Unknown view holder")
         }
     }
@@ -56,8 +60,8 @@ class HomeMenuAdapter(
  * ViewHolder implementation for regular menu items with just a label.
  */
 private class MenuItemViewHolder(
-    val labelView: TextView,
-    val listener: View.OnClickListener
+        val labelView: TextView,
+        val listener: View.OnClickListener
 ) : RecyclerView.ViewHolder(labelView) {
 
     companion object {
@@ -77,8 +81,8 @@ private class MenuItemViewHolder(
  * on whether the app was updated recently.
  */
 private class WhatsNewViewHolder(
-    itemView: View,
-    val listener: View.OnClickListener
+        itemView: View,
+        val listener: View.OnClickListener
 ) : RecyclerView.ViewHolder(itemView) {
     val dotView: View = itemView.findViewById(R.id.dot)
 
@@ -103,7 +107,7 @@ private class WhatsNewViewHolder(
  * Simple data class for describing menu items.
  */
 private class MenuItem(
-    val id: Int,
-    val viewType: Int,
-    val label: String
+        val id: Int,
+        val viewType: Int,
+        val label: String
 )

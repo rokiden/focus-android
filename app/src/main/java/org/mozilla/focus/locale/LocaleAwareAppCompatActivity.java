@@ -108,6 +108,12 @@ public abstract class LocaleAwareAppCompatActivity
         startActivityForResult(settingsIntent, 0);
     }
 
+    public void openProxySettings() {
+        final Intent settingsIntent = new Intent(this, SettingsActivity.class);
+        settingsIntent.putExtra(SettingsActivity.SHOULD_OPEN_PROXY_EXTRA, true);
+        startActivityForResult(settingsIntent, 0);
+    }
+
     @Override
     protected void onActivityResult(int requestCode, int resultCode, Intent data) {
         super.onActivityResult(requestCode, resultCode, data);

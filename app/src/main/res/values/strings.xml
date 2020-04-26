@@ -55,6 +55,7 @@
     <string name="menu_about">About</string>
     <string name="menu_help">Help</string>
     <string name="menu_rights">Your Rights</string>
+    <string name="menu_proxy">Proxy</string>
 
     <!-- Menu item: This is the label for a menu entry that shows how many trackers have been blocked
          for the currently loaded website. The number of blocked trackers is shown below this label.
@@ -674,8 +675,17 @@ be temporary, and you can try again later.</li>
     <!-- Description of what a user may find in the Advanced Setting category, used for debugging -->
     <string name="preference_advanced_summary">Developer tools</string>
 
+    <!-- Description of what a user may find in the Proxy Setting category -->
+    <string name="preference_proxy_summary">Proxy configuration</string>
+
     <!-- Title of Advanced Setting category -->
     <string name="preference_category_advanced">Advanced</string>
+
+    <!-- Title of Proxy Setting category -->
+    <string name="preference_category_proxy">Proxy</string>
+
+    <!-- Preference to enable proxy -->
+    <string name="preference_proxy_enable">Enable proxy</string>
 
     <!-- Preference to enable remote debugging of the app via USB or Wi-Fi -->
     <string name="preference_remote_debugging">Remote debugging via USB/Wi-Fi</string>
@@ -834,4 +844,8 @@ be temporary, and you can try again later.</li>
 
     <!-- Label for the checkbox to send the tab crash report to Mozilla -->
     <string name="crash_report_send_crash_label">Send crash report to Mozilla</string>
+
+    <string name="proxy_server_host_hint">Proxy server host</string>
+    <string name="proxy_server_port_hint">Proxy server port</string>
+    <string name="proxy_server_bypass_hint">Hosts without proxy</string>
 </resources>
